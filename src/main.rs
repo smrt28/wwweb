@@ -1,9 +1,13 @@
+mod c1;
+mod chat;
+
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yew_router::hooks::use_navigator;
 use log::info;
-use gloo_net::http::Request;
-
+//use gloo_net::http::Request;
+use crate::c1::*;
+use crate::chat::*;
 //use wasm_bindgen::JsValue;
 
 #[derive(Clone, Routable, PartialEq)]
@@ -63,6 +67,7 @@ fn switch(routes: Route) -> Html {
 fn Home() -> Html {
     info!("Home");
     let token = use_state(|| String::new());
+    /*
     {
         let t = token.clone();
         use_effect_with((), move |_| {
@@ -77,6 +82,8 @@ fn Home() -> Html {
         });
     }
 
+
+
     let b1 = use_state(|| true);
     let onclick = {
         let b1 = b1.clone();
@@ -84,19 +91,41 @@ fn Home() -> Html {
             b1.set(false);
         })
     };
+     */
+
+        let items = vec![
+        QaItem {
+            question: "Does the API support rate limiting?".into(),
+            verdict: Verdict::Yes,
+            explanation: "Requests are throttled to protect stability. Short bursts are fine; sustained high traffic is shaped.".into(),
+        },
+        QaItem {
+            question: "Is offline mode available by default?".into(),
+            verdict: Verdict::No,
+            explanation: "Requires a local cache or extension; the app expects a live connection by default.".into(),
+        },
+        QaItem {
+            question: "Is water wet?".into(),
+            verdict: Verdict::Wrong,
+            explanation: "Not a useful yes/no in this context. Try asking about behavior or properties instead.".into(),
+        },
+        QaItem {
+            question: "Can I export my data?".into(),
+            verdict: Verdict::Other("Maybe".into()),
+            explanation: "Export is available for paid plans only; check your subscription.".into(),
+        },
+    ];
+    let on_submit = Callback::from(|text: String| {
+        web_sys::console::log_1(&format!("User asked: {}", text).into());
+        // You’d typically send this upstream or mutate state here.
+    });
 
     html! {
         <>
-        <h1>{ "New Home" }</h1>
-        <p>{token.to_string()}</p>
-        <p> <button {onclick}>{ "Finish loading" }</button> </p>
-        <Hello is_loading={*b1} name={AttrValue::Static("Bob1")} />
-
-        <p>
-        {"Q:"} <textarea>{"default value"}</textarea>
-        </p>
+        <QaList items={items} on_submit={on_submit}/>
         </>
     }
+
 }
 
 
