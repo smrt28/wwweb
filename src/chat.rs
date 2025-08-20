@@ -78,28 +78,45 @@ pub fn qa_list(props: &QaListProps) -> Html {
                 }
                 .qa-heading { margin: 24px 0 12px; font-size: 1.5rem; font-weight: 650; }
                 .qa-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-                .qa-item {
-                    background: #fff;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                    padding: 16px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                }
-                .qa-item .question { font-weight: 600; margin-bottom: 8px; }
-                .answer-line { display: flex; align-items: flex-start; gap: 8px; }
 
-
-.badge {
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-right: .4em;
+.qa-item {
+  display: flex;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 12px;
 }
 
-.badge.yes   { color: #111; font-weight: 800; }
-.badge.no    { color: #333; font-weight: 800; }
-.badge.wrong { color: #555; font-style: italic; }
-.badge.other { color: #444; font-weight: 700; }
+.badge {
+  flex: 0 0 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 12px;
+  border-right: 1px solid #ddd;
+}
 
+.badge.yes   { color: #000; }
+.badge.no    { color: #000; }
+.badge.wrong { color: #555; font-style: italic; }
+
+.qa-body {
+  flex: 1;
+  padding: 12px;
+}
+
+.question {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.explanation {
+  color: #555;
+}
 
                 .explanation { color: #555; }
                 .ask-box { background:#fff; border:1px solid #ddd; border-radius:8px; padding:16px; }
@@ -113,13 +130,15 @@ pub fn qa_list(props: &QaListProps) -> Html {
 
             <div class="qa-list">
                 { for props.items.iter().map(|it| html!{
-                    <div class="qa-item">
-                        <div class="question">{ it.question.clone() }</div>
-                        <div class="answer-line">
-                            <span class={it.verdict.class()}>{ it.verdict.label() }</span>
-                            <span class="explanation">{ it.explanation.clone() }</span>
-                        </div>
-                    </div>
+
+<div class="qa-item">
+  <div class={it.verdict.class()}>{ it.verdict.label() }</div>
+  <div class="qa-body">
+    <div class="question">{ it.question.clone() }</div>
+    <div class="explanation">{ it.explanation.clone() }</div>
+  </div>
+</div>
+
                 })}
             </div>
 
