@@ -131,13 +131,13 @@ pub fn qa_list(props: &QaListProps) -> Html {
             <div class="qa-list">
                 { for props.items.iter().map(|it| html!{
 
-<div class="qa-item">
-  <div class={it.verdict.class()}>{ it.verdict.label() }</div>
-  <div class="qa-body">
-    <div class="question">{ it.question.clone() }</div>
-    <div class="explanation">{ it.explanation.clone() }</div>
-  </div>
-</div>
+                   <div class="qa-item">
+                     <div class={it.verdict.class()}>{ it.verdict.label() }</div>
+                     <div class="qa-body">
+                       <div class="question">{ it.question.clone() }</div>
+                       <div class="explanation">{ it.explanation.clone() }</div>
+                     </div>
+                   </div>
 
                 })}
             </div>

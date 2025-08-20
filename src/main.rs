@@ -6,7 +6,7 @@ use yew_router::prelude::*;
 use yew_router::hooks::use_navigator;
 use log::info;
 //use gloo_net::http::Request;
-use crate::c1::*;
+//use crate::c1::*;
 use crate::chat::*;
 //use wasm_bindgen::JsValue;
 
@@ -66,7 +66,7 @@ fn switch(routes: Route) -> Html {
 #[function_component]
 fn Home() -> Html {
     info!("Home");
-    let token = use_state(|| String::new());
+    //let token = use_state(|| String::new());
     /*
     {
         let t = token.clone();
