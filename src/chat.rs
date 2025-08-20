@@ -5,7 +5,7 @@ use yew::prelude::*;
 pub enum Verdict {
     Yes,
     No,
-    Wrong,
+    Unable,
     Other(String), // e.g. "Maybe", "N/A", "Hmm"
 }
 
@@ -14,7 +14,7 @@ impl Verdict {
         match self {
             Verdict::Yes => "Yes",
             Verdict::No => "No",
-            Verdict::Wrong => "Wrong",
+            Verdict::Unable => "Unable",
             Verdict::Other(s) => s.as_str(),
         }
     }
@@ -23,7 +23,7 @@ impl Verdict {
         match self {
             Verdict::Yes => "badge yes",
             Verdict::No => "badge no",
-            Verdict::Wrong => "badge wrong",
+            Verdict::Unable => "badge wrong",
             Verdict::Other(_) => "badge other",
         }
     }
@@ -79,44 +79,44 @@ pub fn qa_list(props: &QaListProps) -> Html {
                 .qa-heading { margin: 24px 0 12px; font-size: 1.5rem; font-weight: 650; }
                 .qa-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
 
-.qa-item {
-  display: flex;
-  align-items: flex-start;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  margin-bottom: 12px;
-}
+                .qa-item {
+                  display: flex;
+                  align-items: flex-start;
+                  background: #fff;
+                  border: 1px solid #ddd;
+                  border-radius: 6px;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                  margin-bottom: 12px;
+                }
 
-.badge {
-  flex: 0 0 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 12px;
-  border-right: 1px solid #ddd;
-}
+                .badge {
+                  flex: 0 0 70px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  padding: 12px;
+                  border-right: 1px solid #ddd;
+                }
 
-.badge.yes   { color: #000; }
-.badge.no    { color: #000; }
-.badge.wrong { color: #555; font-style: italic; }
+                .badge.yes   { color: #000; }
+                .badge.no    { color: #000; }
+                .badge.wrong { color: #555; font-style: italic; }
 
-.qa-body {
-  flex: 1;
-  padding: 12px;
-}
+                .qa-body {
+                  flex: 1;
+                  padding: 12px;
+                }
 
-.question {
-  font-weight: 600;
-  margin-bottom: 6px;
-}
+                .question {
+                  font-weight: 600;
+                  margin-bottom: 6px;
+                }
 
-.explanation {
-  color: #555;
-}
+                .explanation {
+                  color: #555;
+                }
 
                 .explanation { color: #555; }
                 .ask-box { background:#fff; border:1px solid #ddd; border-radius:8px; padding:16px; }

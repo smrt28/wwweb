@@ -106,7 +106,7 @@ fn Home() -> Html {
         },
         QaItem {
             question: "Is water wet?".into(),
-            verdict: Verdict::Wrong,
+            verdict: Verdict::Unable,
             explanation: "Not a useful yes/no in this context. Try asking about behavior or properties instead.".into(),
         },
         QaItem {
