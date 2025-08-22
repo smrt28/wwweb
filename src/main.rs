@@ -11,8 +11,12 @@ use log::info;
 //use crate::c1::*;
 //use crate::chat::*;
 use crate::ask_prompt_component::*;
-//use wasm_bindgen::JsValue;
 use gloo_storage::{LocalStorage, Storage};
+use wasm_bindgen::JsValue;
+use anyhow::{Context, Result};
+
+
+struct SoftState {}
 
 
 #[derive(Clone, Routable, PartialEq)]
@@ -54,23 +58,19 @@ fn switch(routes: Route) -> Html {
 
 #[function_component]
 fn Home() -> Html {
-
     use_state(|| {});
-
+    //use_context::<SoftState>();
     let navigator = use_navigator().unwrap();
-
     let onclick = Callback::from(move |_| wasm_bindgen_futures::spawn_local({
         let navigator = navigator.clone();
         async move {
-            let res = Request::get("/api/token")
-                .send()
-                .await
-                .unwrap();
-            
-            let token = res.text().await.unwrap();
-            info!("res: {:?}", token);
-            LocalStorage::set("token", &token).unwrap();
-            navigator.push(&Route::Game);
+            if let Ok(token) = fetch_text("/api/token").await {
+                info!("res: {:?}", token);
+                LocalStorage::set("token", &token).unwrap();
+                navigator.push(&Route::Game);
+            } else {
+                navigator.push(&Route::NotFound);
+            }
         }
     }));
     html! {
@@ -82,61 +82,43 @@ fn Home() -> Html {
 }
 
 
+async fn fetch_text(path: &str) -> Result<String> {
+    let res = Request::get(path).send().await?;
+    let text = res.text().await?;
+    info!("res: {:?}", text);
+    Ok(text)
+}
+
+
 #[function_component]
 fn Game() -> Html {
     let navigator = use_navigator().unwrap();
-
+    let token: String = match LocalStorage::get("token").ok() {
+        Some(token) => token,
+        None => {
+            navigator.push(&Route::Home);
+            return html! {};
+        }
+    };
     let on_send = {
         let navigator = navigator.clone();
         Callback::from(move |text: String| {
             info!("on_send: {}", text);
-
-            wasm_bindgen_futures::spawn_local({
-                let navigator = navigator.clone();
-                async move {
-                    let res = Request::get("/api/token")
-                        .send()
-                        .await
-                        .unwrap();
-                    info!("res: {:?}", res.text().await.unwrap());
-
-                    navigator.push(&Route::Game);
-                }
-
-            });
         })
     };
 
     html! {
         <>
+        <h1>{ token }</h1>
         <AskPrompt prompt={"Make your guess..."} on_send={on_send}/>
         </>
     }
 }
 
-
 #[function_component]
 fn App() -> Html {
-
-
     let counter = use_state(|| 0);
     info!("counter is: {:?}", counter);
-    /*
-    let onclick = {
-        let counter = counter.clone();
-        move |_| {
-            let value = *counter + 1;
-            counter.set(value);
-        }
-    };
-
-    html! {
-        <div>
-            <button {onclick}>{ "+1..." }</button>
-            <p>{ *counter }</p>
-        </div>
-    }
-     */
         html! {
         <BrowserRouter>
             <Switch<Route> render={switch} /> // <- must be child of <BrowserRouter>
