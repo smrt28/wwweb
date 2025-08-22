@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use yew::prelude::*;
 
 /// Verdict shown as the leading badge.

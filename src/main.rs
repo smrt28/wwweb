@@ -1,14 +1,19 @@
 mod c1;
 mod chat;
+mod ask_prompt_component;
 
+use gloo::net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use yew_router::hooks::use_navigator;
 use log::info;
 //use gloo_net::http::Request;
 //use crate::c1::*;
-use crate::chat::*;
+//use crate::chat::*;
+use crate::ask_prompt_component::*;
 //use wasm_bindgen::JsValue;
+use gloo_storage::{LocalStorage, Storage};
+
 
 #[derive(Clone, Routable, PartialEq)]
 enum Route {
@@ -39,22 +44,6 @@ fn Hello(&Props { is_loading, ref name }: &Props) -> Html {
     }
 }
 
-
-
-#[function_component(Game)]
-fn game() -> Html {
-    let navigator = use_navigator().unwrap();
-
-    let onclick = Callback::from(move |_| navigator.push(&Route::Home));
-    html! {
-        <div>
-            <h1>{ "Game" }</h1>
-            <button {onclick}>{ "Go Home" }</button>
-        </div>
-    }
-}
-
-
 fn switch(routes: Route) -> Html {
     match routes {
         Route::Home => html! { <Home /> },
@@ -65,67 +54,64 @@ fn switch(routes: Route) -> Html {
 
 #[function_component]
 fn Home() -> Html {
-    info!("Home");
-    //let token = use_state(|| String::new());
-    /*
-    {
-        let t = token.clone();
-        use_effect_with((), move |_| {
-            wasm_bindgen_futures::spawn_local(async move {
-                let res = Request::get("http://localhost:8000/api/token")
-                    .send()
-                    .await
-                    .unwrap();
 
-                t.set(res.text().await.unwrap());
-            });
-        });
+    use_state(|| {});
+
+    let navigator = use_navigator().unwrap();
+
+    let onclick = Callback::from(move |_| wasm_bindgen_futures::spawn_local({
+        let navigator = navigator.clone();
+        async move {
+            let res = Request::get("/api/token")
+                .send()
+                .await
+                .unwrap();
+            
+            let token = res.text().await.unwrap();
+            info!("res: {:?}", token);
+            LocalStorage::set("token", &token).unwrap();
+            navigator.push(&Route::Game);
+        }
+    }));
+    html! {
+        <div>
+            <h1>{ "Game" }</h1>
+            <button {onclick}>{ "New game" }</button>
+        </div>
     }
+}
 
 
+#[function_component]
+fn Game() -> Html {
+    let navigator = use_navigator().unwrap();
 
-    let b1 = use_state(|| true);
-    let onclick = {
-        let b1 = b1.clone();
-        Callback::from(move |_| {
-            b1.set(false);
+    let on_send = {
+        let navigator = navigator.clone();
+        Callback::from(move |text: String| {
+            info!("on_send: {}", text);
+
+            wasm_bindgen_futures::spawn_local({
+                let navigator = navigator.clone();
+                async move {
+                    let res = Request::get("/api/token")
+                        .send()
+                        .await
+                        .unwrap();
+                    info!("res: {:?}", res.text().await.unwrap());
+
+                    navigator.push(&Route::Game);
+                }
+
+            });
         })
     };
-     */
-
-        let items = vec![
-        QaItem {
-            question: "Does the API support rate limiting?".into(),
-            verdict: Verdict::Yes,
-            explanation: "Requests are throttled to protect stability. Short bursts are fine; sustained high traffic is shaped.".into(),
-        },
-        QaItem {
-            question: "Is offline mode available by default?".into(),
-            verdict: Verdict::No,
-            explanation: "Requires a local cache or extension; the app expects a live connection by default.".into(),
-        },
-        QaItem {
-            question: "Is water wet?".into(),
-            verdict: Verdict::Unable,
-            explanation: "Not a useful yes/no in this context. Try asking about behavior or properties instead.".into(),
-        },
-        QaItem {
-            question: "Can I export my data?".into(),
-            verdict: Verdict::Other("Maybe".into()),
-            explanation: "Export is available for paid plans only; check your subscription.".into(),
-        },
-    ];
-    let on_submit = Callback::from(|text: String| {
-        web_sys::console::log_1(&format!("User asked: {}", text).into());
-        // You’d typically send this upstream or mutate state here.
-    });
 
     html! {
         <>
-        <QaList items={items} on_submit={on_submit}/>
+        <AskPrompt prompt={"Make your guess..."} on_send={on_send}/>
         </>
     }
-
 }
 
 
