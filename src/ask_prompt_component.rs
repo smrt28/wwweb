@@ -8,6 +8,8 @@ pub struct Props {
     pub max_len: usize,
     #[prop_or_default]
     pub on_send: Callback<String>,
+    #[prop_or(false)]
+    pub disabled: bool,
 }
 
 #[function_component(AskPrompt)]
@@ -32,7 +34,7 @@ pub fn ask_prompt(props: &Props) -> Html {
                 ref={textarea_ref}
                 maxlength={props.max_len.to_string()}
             />
-            <button {onclick}>{ "Send" }</button>
+            <button {onclick} disabled={props.disabled}>{ "Send" }</button>
         </div>
     }
 }

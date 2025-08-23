@@ -4,7 +4,9 @@
 mod c1;
 mod chat;
 mod ask_prompt_component;
+mod com;
 
+use std::time::Duration;
 use gloo::net::http::{Request, Response};
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -17,7 +19,7 @@ use crate::ask_prompt_component::*;
 use gloo_storage::{LocalStorage, Storage};
 use wasm_bindgen::JsValue;
 use anyhow::{Context, Result};
-
+use crate::com::*;
 
 struct SoftState {
     n: UseStateHandle<i32>,
@@ -72,7 +74,7 @@ fn Home() -> Html {
     let onclick = Callback::from(move |_| wasm_bindgen_futures::spawn_local({
         let navigator = navigator.clone();
         async move {
-            if let Ok(token) = fetch_text("/api/new_game").await {
+            if let Ok(token) = fetch_text("/api/game/new").await {
                 info!("res: {:?}", token);
                 LocalStorage::set("token", &token).unwrap();
                 navigator.push(&Route::Game);
@@ -88,23 +90,6 @@ fn Home() -> Html {
         </div>
     }
 }
-
-
-async fn fetch_text(path: &str) -> Result<String> {
-    let res = Request::get(path).send().await?;
-    if res.status() != 200 {
-        return Err(anyhow::anyhow!("status[{}]: {}", path, res.status()));
-    }
-    let text = res.text().await?;
-    info!("res: {:?} {:?}", text, res.status());
-    Ok(text)
-}
-
-async fn send_question(token: &str, text: &str) -> Result<()> {
-    info!("{}: asking: {}", token, text);
-    Err(anyhow::anyhow!("ask"))
-}
-
 
 #[function_component]
 fn Game() -> Html {
@@ -137,10 +122,16 @@ fn Game() -> Html {
 
     let on_send = {
         let token = token.clone();
+        let question_in_air = question_in_air.clone();
         Callback::from(move |text: String| {
             let token = token.clone();
+            let question_in_air = question_in_air.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                send_question(&token, &text).await;
+                question_in_air.set(true);
+                if let Ok(res) = send_question(&token, &text).await {
+                    info!("res: {:?}", res);
+                }
+                question_in_air.set(false);
             });
         })
     };
@@ -148,7 +139,10 @@ fn Game() -> Html {
     html! {
         <>
         <h1>{ token }</h1>
-        <AskPrompt prompt={"Make your guess..."} on_send={on_send}/>
+        <AskPrompt prompt={"Make your guess..."}
+            on_send={on_send}
+            disabled={*question_in_air}
+        />
         <hr/>
         <pre>{ debug.to_string() }</pre>
         <pre>{ question_in_air.to_string() }</pre>
